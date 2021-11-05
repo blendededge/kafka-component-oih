@@ -1,0 +1,68 @@
+{
+  "title": "Kafka Connector",
+  "description": "A generic connector for producing and consuming Apache Kafka events.",
+  "buildType": "docker",
+  "triggers": {
+    "consume": {
+      "main": "./lib/triggers/consume.js",
+      "title": "Kafka consumer group events consumer",
+      "description": "Component will subscribe to topic(s) in a Kafkaconsumer group",
+      "help": {
+        "link": "/components/kafka/index.html#http-request"
+      },
+      "type": "polling",
+      "metadata": {},
+      "fields": {
+        "dontThrowErrorFlg": {
+          "label": "Don`t throw Error on Failed Calls",
+          "viewClass": "CheckBoxView"
+        },
+        "splitResult": {
+          "label": "Split Result if it is an Array",
+          "viewClass": "CheckBoxView",
+          "note": "After making the request, and applying the above JSONata expression, if the result is an array and this box is checked, we will emit one message for each element of the array."
+        },
+        "enableRebound": {
+          "label": "Retry on failure",
+          "viewClass": "CheckBoxView"
+        },
+        "requestTimeoutPeriod": {
+          "label": "Request timeout",
+          "viewClass": "TextFieldView",
+          "note": "Timeout period in milliseconds while component waiting for server response, should be positive integer (1-1140000), defaults to 100000 (100 sec)"
+        }
+      }
+    }
+  },
+  "actions": {
+    "produce": {
+      "main": "./lib/actions/produce.js",
+      "title": "Kafka event topic producer",
+      "description": "Produce Apache Kafka message(s) to a topic",
+      "help": {
+        "link": "/components/kafka/index.html#http-request-1"
+      },
+      "metadata": {},
+      "fields": {
+        "dontThrowErrorFlg": {
+          "label": "Don`t throw Error on Failed Calls",
+          "viewClass": "CheckBoxView"
+        },
+        "splitResult": {
+          "label": "Split Result if it is an Array",
+          "viewClass": "CheckBoxView",
+          "note": "After making the request, and applying the above JSONata expression, if the result is an array and this box is checked, we will emit one message for each element of the array."
+        },
+        "enableRebound": {
+          "label": "Retry on failure",
+          "viewClass": "CheckBoxView"
+        },
+        "requestTimeoutPeriod": {
+          "label": "Request timeout",
+          "viewClass": "TextFieldView",
+          "note": "Timeout period in milliseconds while component waiting for server response, should be positive integer (1-1140000), defaults to 100000 (100 sec)"
+        }
+      }
+    }
+  }
+}
