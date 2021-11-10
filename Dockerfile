@@ -1,14 +1,14 @@
 FROM node:12-alpine AS base
-RUN apk --no-cache add \
-    python \
-    make \
+RUN apk update && apk add --no-cache \
+    python3 \
     g++ \
-    libc6-compat
+    make \
+    libc6-compat \ 
+    bash
 
 WORKDIR /usr/src/app
 
 COPY package.json /usr/src/app
-COPY package-lock.json /usr/src/app
 
 RUN npm install --production
 

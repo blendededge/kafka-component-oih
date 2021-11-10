@@ -19,7 +19,8 @@
   ],
   "dependencies": {
     "@openintegrationhub/ferryman": "~1.7.0",
-    "node-rdkafka": "^2.11.0",
+    "kafkajs": "^1.15.0",
+    "testdouble": "^3.16.3",
     "uuid": "^8.3.2"
   },
   "author": "Blended Edge",
