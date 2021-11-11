@@ -32,15 +32,36 @@ const componentConfig = {
 	'sasl-mechanisms': 'PLAIN',
 };
 
+const errorComponentConfig = {
+	...componentConfig,
+	topic: 'test-topic-error'
+};
+
+const errorKafka = kafkaClient;
+errorKafka.producer.send = () => new Error('Error in sending messages');
+
 describe('produce action', () => {
-	let process, kafka, emit;
+	let process, kafka, emit, that, error;
 	beforeEach(() => {
+		that = {
+			emit: (data, msg) => msg,
+			logger: {
+				info: () => true,
+				debug: () => true,
+				error: () => true
+			}
+		};
+
 		kafka = td.replace('../lib/kafka');
 		emit = td.function();
+		error = td.function();
 		process = require('../lib/actions/produce').process;
 
-		td.when(kafka.createKafka(td.matchers.anything())).thenReturn(kafkaClient);
+		td.when(kafka.createKafka(componentConfig)).thenReturn(kafkaClient);
+		td.when(kafka.createKafka(errorComponentConfig)).thenReturn(errorKafka);
 		td.when(emit('data', { topic: 'test-topic', partition: 0 }));
+		td.when(emit('error', td.matchers.anything()));
+		td.when(error(td.matchers.anything()));
 	});
 
 	afterEach(() => {
@@ -48,17 +69,7 @@ describe('produce action', () => {
 	});
 
 	it('produce message', async () => {
-		await process.call(
-			{ 
-				emit: (type, body) => body, 
-				logger: {
-					debug: (data) => data
-				}
-			}, 
-			{}, 
-			componentConfig, 
-			{}
-		);
+		await process.call(that, {}, componentConfig, {});
 		td.verify(emit('data', { topic: 'test-topic', partition: 0 }));
 	});
 
@@ -66,6 +77,8 @@ describe('produce action', () => {
 	});
 
 	it('on error emit exception', async () => {
+		await process.call(that, {}, errorComponentConfig, {});
+		td.verify(error(td.matchers.anything()));
 	});
 
 });
