@@ -56,6 +56,11 @@
         "enableRebound": {
           "label": "Retry on failure",
           "viewClass": "CheckBoxView"
+        },
+        "requestTimeoutPeriod": {
+          "label": "Request timeout",
+          "viewClass": "TextFieldView",
+          "note": "Timeout period in milliseconds while component waiting for server response, should be positive integer (1-1140000), defaults to 100000 (100 sec)"
         }
       }
     }
