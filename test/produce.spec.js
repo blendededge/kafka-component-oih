@@ -1,43 +1,46 @@
 /* eslint-disable no-unused-vars */
 const td = require('testdouble');
-const kafka = require('../lib/kafka');
+const { expect } = require('chai');
 
-// Test still in progress
-// Currently trying to get the createKafka function to be mocked somehow.
+const kafkaClient = {};
+kafkaClient.producer = () => {
+	return {
+		connect: () => true,
+		send: () => [{
+			topicName: 'test-topic',
+			partition: 0
+		}],
+		disconnect: () => true
+	};
+};
+kafkaClient.admin = () => {
+	return {
+		connect: () => true,
+		listTopics: () => ['test-topic'],
+		disconnect: () => true
+	};
+};
+const componentConfig = {
+	topic: 'test-topic',
+	messages: [
+		{key: 'hello', value: 'world'}
+	],
+	'bootstrap-servers': 'test',
+	'sasl-username': 'test',
+	'sasl-password': 'test',
+	'security-protocol': 'sasl_plain',
+	'sasl-mechanisms': 'PLAIN',
+};
+
 describe('produce action', () => {
-	const kafkaClient = {
-		producer: {
-			connect: true,
-			send: [{
-				topicName: 'test-topic',
-				partition: 0
-			}],
-			disconnect: true
-		},
-		admin: {
-			connect: true,
-			listTopics: ['test-topic'],
-			disconnect: true
-		}
-	};
-
-	const componentConfig = {
-		topic: 'test-topic',
-		messages: [
-			{key: 'hello', value: 'world'}
-		],
-		'bootstrap-servers': 'test',
-		'sasl-username': 'test',
-		'sasl-password': 'test',
-		'security-protocol': 'sasl_plain',
-		'sasl-mechanisms': 'PLAIN',
-	};
-	let process;
+	let process, kafka, emit;
 	beforeEach(() => {
-		td.reset();
+		kafka = td.replace('../lib/kafka');
+		emit = td.function();
 		process = require('../lib/actions/produce').process;
-		const res = td.function(kafka);
-		td.when(res(td.matchers.anything())).thenReturn('hi');
+
+		td.when(kafka.createKafka(td.matchers.anything())).thenReturn(kafkaClient);
+		td.when(emit('data', { topic: 'test-topic', partition: 0 }));
 	});
 
 	afterEach(() => {
@@ -45,12 +48,18 @@ describe('produce action', () => {
 	});
 
 	it('produce message', async () => {
-		try {
-			const res = await process({}, componentConfig, {});
-			console.log(res);
-		} catch (e) {
-			console.log(e);
-		}
+		await process.call(
+			{ 
+				emit: (type, body) => body, 
+				logger: {
+					debug: (data) => data
+				}
+			}, 
+			{}, 
+			componentConfig, 
+			{}
+		);
+		td.verify(emit('data', { topic: 'test-topic', partition: 0 }));
 	});
 
 	it('reconnect on error', async () => {
