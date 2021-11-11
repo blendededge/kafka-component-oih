@@ -60,7 +60,6 @@ describe('produce action', () => {
 		td.when(kafka.createKafka(componentConfig)).thenReturn(kafkaClient);
 		td.when(kafka.createKafka(errorComponentConfig)).thenReturn(errorKafka);
 		td.when(emit('data', { topic: 'test-topic', partition: 0 }));
-		td.when(emit('error', td.matchers.anything()));
 		td.when(error(td.matchers.anything()));
 	});
 
