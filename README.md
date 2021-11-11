@@ -11,7 +11,31 @@ This document covers the following topics:
 
 ## Introduction
 
+## Configuration Fields
+The following are the configuration fields for the Kafka component. 
 
+### Kafka Cluster Configuration
+- `sasl-username` - Username for SASL log in
+- `sasl-password` - Password for SASL log in
+- `bootstrap-servers` - Server URL for cluster
+
+### Producer Specific
+- `topic` - Name of the topic to produce record to
+- `messages` - Array of message objects
+```json
+{
+	"messages": [
+		{
+			"key": "Message Key", 
+			"value": "Message Value"
+		}
+	]
+}
+```
+
+### Consumer Specific
+- `groupId` - Group ID for consumer. If not provided, defaults to `default`
+- `topic` - Name of topic to consume messages from
 
 ### Secret Service Integration
 
