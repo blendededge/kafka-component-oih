@@ -15,13 +15,13 @@ This document covers the following topics:
 The following are the configuration fields for the Kafka component. 
 
 ### Kafka Cluster Configuration
-- `sasl-username` - Username for SASL log in
-- `sasl-password` - Password for SASL log in
+- `sasl-username` - Username for SASL log in - Will be set automatically if configured to use `BASIC` secret service type
+- `sasl-password` - Password for SASL log in - Will be set automatically if configured to use `BASIC` secret service type
 - `bootstrap-servers` - Server URL for cluster
 
 ### Producer Specific
 - `topic` - Name of the topic to produce record to
-- `messages` - Array of message objects
+- `messages` - Array of message objects. Alternatively, this can be provided via the message object passed into the component.
 ```json
 {
 	"messages": [
