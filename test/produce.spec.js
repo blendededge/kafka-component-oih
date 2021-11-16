@@ -1,35 +1,32 @@
 /* eslint-disable no-unused-vars */
 const td = require('testdouble');
 const { expect } = require('chai');
+const kafkaConnections = require('../lib/kafka');
 
-const kafkaClient = {};
-kafkaClient.producer = () => {
-	return {
-		connect: () => true,
-		send: () => [{
-			topicName: 'test-topic',
-			partition: 0
-		}],
-		disconnect: () => true
-	};
-};
-kafkaClient.admin = () => {
-	return {
-		connect: () => true,
-		listTopics: () => ['test-topic'],
-		disconnect: () => true
-	};
-};
+const ANY_PARAM = td.matchers.anything();
+
 const componentConfig = {
 	topic: 'test-topic',
-	messages: [
-		{key: 'hello', value: 'world'}
-	],
-	'bootstrap-servers': 'test',
-	'sasl-username': 'test',
-	'sasl-password': 'test',
-	'security-protocol': 'sasl_plain',
-	'sasl-mechanisms': 'PLAIN',
+	mechanism: 'plain',
+	clientId: '12345-clientId',
+	groupId: '54321-groupId',
+	'bootstrap-servers': 'test-server',
+	'sasl-username': 'test-username',
+	'sasl-password': 'test-password',
+};
+
+const auth = {
+	basic: {
+		username: 'test-username',
+		password: 'test-password'
+	}
+};
+
+const connectionName = {
+	username: componentConfig['sasl-username'],
+	clientId: componentConfig.clientId,
+	mechanism: componentConfig.mechanism,
+	'bootstrap-servers': componentConfig['bootstrap-servers']
 };
 
 const errorComponentConfig = {
@@ -37,11 +34,27 @@ const errorComponentConfig = {
 	topic: 'test-topic-error'
 };
 
-const errorKafka = kafkaClient;
-errorKafka.producer.send = () => new Error('Error in sending messages');
+const producersStub = {
+	get: () => {
+		return {
+			send: ({ topic }) => {
+				if (topic === 'test-topic') {
+					return [
+						{
+							topic,
+							partition: 0
+						}
+					];
+				} else {
+					throw new Error();
+				}
+			}
+		};
+	}
+};
 
 describe('produce action', () => {
-	let process, kafka, emit, that, error;
+	let process, emit, that, error;
 	beforeEach(() => {
 		that = {
 			emit: (data, msg) => msg,
@@ -52,15 +65,20 @@ describe('produce action', () => {
 			}
 		};
 
-		kafka = td.replace('../lib/kafka');
+		const checkForProducerConnection = td.replace(kafkaConnections, 'checkForProducerConnection');
+		const ensureTopicExists = td.replace(kafkaConnections, 'ensureTopicExists');
+		const getAuthFromSecretConfig = td.replace('../lib/helpers');
 		emit = td.function();
 		error = td.function();
-		process = require('../lib/actions/produce').process;
+		td.replace(kafkaConnections, 'producers', producersStub);
+		td.when(checkForProducerConnection(componentConfig, connectionName)).thenResolve(true);
+		td.when(ensureTopicExists(connectionName, componentConfig.topic)).thenResolve(true);
+		td.when(getAuthFromSecretConfig(componentConfig, ANY_PARAM)).thenReturn(auth);
+		td.when(getAuthFromSecretConfig(errorComponentConfig, ANY_PARAM)).thenReturn(auth);
+		td.when(emit('data', ANY_PARAM));
+		td.when(error(ANY_PARAM));
 
-		td.when(kafka.createKafka(componentConfig)).thenReturn(kafkaClient);
-		td.when(kafka.createKafka(errorComponentConfig)).thenReturn(errorKafka);
-		td.when(emit('data', { topic: 'test-topic', partition: 0 }));
-		td.when(error(td.matchers.anything()));
+		process = require('../lib/actions/produce').process;
 	});
 
 	afterEach(() => {
@@ -68,16 +86,21 @@ describe('produce action', () => {
 	});
 
 	it('produce message', async () => {
-		await process.call(that, {}, componentConfig, {});
-		td.verify(emit('data', { topic: 'test-topic', partition: 0 }));
+		await process.call(that, { data: {} }, componentConfig, {});
+		td.verify(emit('data', ANY_PARAM));
 	});
 
 	it('reconnect on error', async () => {
 	});
 
 	it('on error emit exception', async () => {
-		await process.call(that, {}, errorComponentConfig, {});
-		td.verify(error(td.matchers.anything()));
+		let error;
+		try {
+			await process.call(that, { data: {} }, errorComponentConfig, {});
+		} catch (e) {
+			error = e;
+		}
+		expect(error.message).to.contain('Error');
 	});
 
 });
