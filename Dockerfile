@@ -3,8 +3,7 @@ RUN apk update && apk add --no-cache \
     python3 \
     g++ \
     make \
-    libc6-compat \ 
-    bash
+    libc6-compat
 
 WORKDIR /usr/src/app
 
