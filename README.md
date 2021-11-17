@@ -11,7 +11,7 @@ This document covers the following topics:
 - [Secret Service Integration](#secret-service-integration)
 
 ## Introduction
-The Kafka component is built to be used as a global component at the beginning of a flow. While the component is active, it will retain connections for all producers and consumers that are configured, for any and all flows connected to component. Upon stopping of the global component, all connections will disconnect. 
+The Kafka component is built to be used as a component at the beginning of a flow. While the component is active, it will retain connections for all producers and consumers that are configured, for any and all flows connected to component. Upon stopping of the global component, all connections will disconnect. 
 
 ## Configuration Fields
 The following are the configuration fields for the Kafka component. 
