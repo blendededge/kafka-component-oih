@@ -21,6 +21,7 @@ The following are the configuration fields for the Kafka component.
 - `sasl-password` - Password for SASL log in - Will be set automatically if configured to use `BASIC` secret service type
 - `bootstrap-servers` - Server URL for cluster
 - `clientId` - Identifier for Kafka cluster
+- `injectSecret` - Boolean to enable secret service injection
 
 ### Producer Specific
 - `topic` - Name of the topic to produce record to
