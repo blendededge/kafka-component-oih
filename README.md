@@ -7,11 +7,38 @@ The **Kafka component** is a simple yet powerful component that allows you to co
 This document covers the following topics:
 
 - [Introduction](#introduction)
+- [Configuration Fields](#configuration-fields)
 - [Secret Service Integration](#secret-service-integration)
 
 ## Introduction
+The Kafka component is built to be used as a component at the beginning of a flow. While the component is active, it will retain connections for all producers and consumers that are configured, for any and all flows connected to component. Upon stopping of the global component, all connections will disconnect. 
 
+## Configuration Fields
+The following are the configuration fields for the Kafka component. 
 
+### Kafka Cluster Configuration
+- `sasl-username` - Username for SASL log in - Will be set automatically if configured to use `BASIC` secret service type
+- `sasl-password` - Password for SASL log in - Will be set automatically if configured to use `BASIC` secret service type
+- `bootstrap-servers` - Server URL for cluster
+- `clientId` - Identifier for Kafka cluster
+
+### Producer Specific
+- `topic` - Name of the topic to produce record to
+- `messages` - Array of message objects. Alternatively, this can be provided via the message object passed into the component.
+```json
+{
+	"messages": [
+		{
+			"key": "Message Key", 
+			"value": "Message Value"
+		}
+	]
+}
+```
+
+### Consumer Specific
+- `groupId` - Group ID for consumer. If not provided, defaults to `default`
+- `topic` - Name of topic to consume messages from
 
 ### Secret Service Integration
 
