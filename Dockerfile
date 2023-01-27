@@ -1,4 +1,7 @@
 FROM node:12-alpine AS base
+
+ENV ELASTICIO_OTEL_SERVICE_NAME=COMPONENT:KAFKA
+
 RUN apk update && apk add --no-cache \
     python3 \
     g++ \
