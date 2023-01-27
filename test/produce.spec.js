@@ -86,7 +86,7 @@ describe('produce action', () => {
 	});
 
 	it('produce message', async () => {
-		await process.call(that, { data: {} }, componentConfig, {});
+		await process.call(that, { data: {}, metadata: {} }, componentConfig, {});
 		td.verify(emit('data', ANY_PARAM));
 	});
 
@@ -96,7 +96,7 @@ describe('produce action', () => {
 	it('on error emit exception', async () => {
 		let error;
 		try {
-			await process.call(that, { data: {} }, errorComponentConfig, {});
+			await process.call(that, { data: {}, metadata: {} }, errorComponentConfig, {});
 		} catch (e) {
 			error = e;
 		}
