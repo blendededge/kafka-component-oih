@@ -59,9 +59,11 @@ describe('produce action', () => {
 		that = {
 			emit: (data, msg) => msg,
 			logger: {
-				info: () => true,
-				debug: () => true,
-				error: () => true
+				child: () => ({
+					info: () => true,
+					debug: () => true,
+					error: () => true,
+				}),
 			}
 		};
 
