@@ -56,8 +56,9 @@ const producersStub = {
 describe('produce action', () => {
 	let process, emit, that, error;
 	beforeEach(() => {
+		emit = td.function();
 		that = {
-			emit: (data, msg) => msg,
+			emit,
 			logger: {
 				child: () => ({
 					info: () => true,
@@ -70,7 +71,6 @@ describe('produce action', () => {
 		const checkForProducerConnection = td.replace(kafkaConnections, 'checkForProducerConnection');
 		const ensureTopicExists = td.replace(kafkaConnections, 'ensureTopicExists');
 		const getAuthFromSecretConfig = td.replace('../lib/helpers');
-		emit = td.function();
 		error = td.function();
 		td.replace(kafkaConnections, 'producers', producersStub);
 		td.when(checkForProducerConnection(componentConfig, connectionName)).thenResolve(true);
@@ -96,13 +96,11 @@ describe('produce action', () => {
 	});
 
 	it('on error emit exception', async () => {
-		let error;
-		try {
-			await process.call(that, { data: {} }, errorComponentConfig, {});
-		} catch (e) {
-			error = e;
-		}
-		expect(error.message).to.contain('Error');
+		await process.call(that, { data: {} }, errorComponentConfig, {});
+		td.verify(emit('error', ANY_PARAM));
+		// Verify error message that is emitted
+		const error = td.explain(emit).calls[1].args[1];
+		expect(new String(error)).to.contain('Error');
 	});
 
 });
