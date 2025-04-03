@@ -18,7 +18,7 @@
     "Connector"
   ],
   "dependencies": {
-    "@blendededge/ferryman-extensions": "^2.0.6",
+    "@blendededge/ferryman-extensions": "^2.1.0",
     "@openintegrationhub/ferryman": "^2.4.6",
     "kafkajs": "^2.2.4",
     "uuid": "^9.0.1"
